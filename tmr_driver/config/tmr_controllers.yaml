@@ -1,0 +1,86 @@
+# Settings for ros_control control loop
+hardware_control_loop:
+  loop_hz: &loop_hz 10
+
+# Settings for ros_control hardware interface
+hardware_interface:
+  joints: &robot_joints
+    - joint_1
+    - joint_2
+    - joint_3
+    - joint_4
+    - joint_5
+    - joint_6
+
+# Publish all joint states ----------------------------------------------------
+joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: *loop_hz
+
+# Publish wrench --------------------------------------------------------------
+force_torque_sensor_controller:
+  type: force_torque_sensor_controller/ForceTorqueSensorController
+  publish_rate: *loop_hz
+
+# Joint Trajectory Controller - position based --------------------------------
+# For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
+pos_joint_traj_controller:
+  type: position_controllers/JointTrajectoryController
+  joints: *robot_joints
+  constraints:
+    goal_time: 0.6
+    stopped_velocity_tolerance: 0.05
+    joint_1: {trajectory: 0.2, goal: 0.1}
+    joint_2: {trajectory: 0.2, goal: 0.1}
+    joint_3: {trajectory: 0.2, goal: 0.1}
+    joint_4: {trajectory: 0.2, goal: 0.1}
+    joint_5: {trajectory: 0.2, goal: 0.1}
+    joint_6: {trajectory: 0.2, goal: 0.1}
+  stop_trajectory_duration: 0.5
+  state_publish_rate: *loop_hz
+  action_monitor_rate: 10
+
+# Joint Trajectory Controller - velocity based --------------------------------
+# For detailed explanations of parameter see http://wiki.ros.org/joint_trajectory_controller
+vel_joint_traj_controller:
+  type: velocity_controllers/JointTrajectoryController
+  joints: *robot_joints
+  constraints:
+    goal_time: 0.6
+    stopped_velocity_tolerance: 0.05
+    joint_1: {trajectory: 0.1, goal: 0.1}
+    joint_2: {trajectory: 0.1, goal: 0.1}
+    joint_3: {trajectory: 0.1, goal: 0.1}
+    joint_4: {trajectory: 0.1, goal: 0.1}
+    joint_5: {trajectory: 0.1, goal: 0.1}
+    joint_6: {trajectory: 0.1, goal: 0.1}
+  gains:
+    #!!These values are useable, but maybe not optimal
+    joint_1: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+    joint_2: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+    joint_3: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+    joint_4: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+    joint_5: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+    joint_6: {p: 1.2,  i: 0.0, d: 0.1, i_clamp: 1}
+  # Use a feedforward term to reduce PID gains
+  velocity_ff:
+    joint_1: 1.0
+    joint_2: 1.0
+    joint_3: 1.0
+    joint_4: 1.0
+    joint_5: 1.0
+    joint_6: 1.0
+  stop_trajectory_duration: 0.5
+  state_publish_rate: *loop_hz
+  action_monitor_rate: 10
+
+# Pass an array of joint position directly to the joints
+# Default, do nothing
+joint_group_pos_controller:
+  type: position_controllers/JointGroupPositionController
+  joints: *robot_joints
+
+# Pass an array of joint velocities directly to the joints
+joint_group_vel_controller:
+  type: velocity_controllers/JointGroupVelocityController
+  joints: *robot_joints

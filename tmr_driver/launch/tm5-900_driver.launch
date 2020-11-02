@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+  Usage:
+    tm5-900_driver.launch ip:=<value>
+-->
+<launch>
+  <arg name="sim" default="false" />
+
+  <!-- ip: IP-address of the robot's socket-messaging server -->
+  <arg name="ip" unless="$(arg sim)" />
+
+  <arg name="prefix" default="" />
+  <arg name="ns" default="" />
+
+  <arg name="max_payload" default="4.0" />
+
+  <arg name="load_controller" default="false" />
+
+  <arg name="load_description" default="false" />
+
+  <!-- load robot model and start robot state publisher-->
+  <group unless="$(arg load_description)">
+    <include file="$(find tmr_description)/launch/tmr_description_upload.launch">
+      <arg name="model" value="tm5-900" />
+      <arg name="prefix" value="$(arg prefix)" />
+      <arg name="ns" value="$(arg ns)" />
+    </include>
+  </group>
+
+  <!-- launch tmr_driver -->
+  <include file="$(find tmr_driver)/launch/tmr_driver.launch">
+    <arg name="sim" value="$(arg sim)" />
+
+    <arg name="ip" value="$(arg ip)" unless="$(arg sim)" />
+
+    <arg name="prefix" value="$(arg prefix)" />
+    <arg name="ns" value="$(arg ns)" />
+
+    <arg name="max_payload" value="$(arg max_payload)" />
+  </include>
+
+  <!-- Load controller settings -->
+  <rosparam file="$(find tmr_driver)/config/tm5_controllers.yaml" command="load"/>
+
+  <!-- spawn controller manager -->
+  <node name="ros_control_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
+    output="screen" args="joint_group_pos_controller" />
+
+  <!-- load other controller --> 
+  <node name="ros_control_controller_manager" pkg="controller_manager" type="controller_manager" respawn="false"
+    output="screen" args="load joint_group_vel_controller" /> 
+
+</launch>

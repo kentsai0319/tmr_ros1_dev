@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="sim" default="false" />
+
+  <arg name="ip" unless="$(arg sim)" />
+  <arg name="ip" value="0.0.0.0" if="$(arg sim)" />
+
+  <arg name="prefix" default="" />
+  <arg name="ns" default="" />
+
+  <!--arg name="max_velocity" default="3.14159" /--> <!-- [rad/s] -->
+  <arg name="max_payload" default="6.0" /> <!-- [kg] -->
+
+  <arg name="base_frame" default="$(arg prefix)base" />
+  <arg name="tool_frame" default="$(arg prefix)flang" />
+
+  <!-- start tmr_driver -->
+  <node name="tmr_driver" pkg="tmr_driver" type="tmr_driver" output="screen">
+
+    <param name="sim" type="bool" value="$(arg sim)" />
+
+    <param name="ip_address" type="str" value="$(arg ip)" />
+
+    <param name="prefix" type="str" value="$(arg prefix)" />
+
+    <param name="ns" type="str" value="$(arg ns)" />
+
+    <!--param name="max_velocity" type="double" value="$(arg max_velocity)" /-->
+    <param name="max_payload" type="double" value="$(arg max_payload)" />
+
+    <param name="base_frame" type="str" value="$(arg base_frame)" />
+    <param name="tool_frame" type="str" value="$(arg tool_frame)" />
+
+  </node>
+
+</launch>
