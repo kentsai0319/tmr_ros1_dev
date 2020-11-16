@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import rospy
-from tmr_msgs.srv import *
+#import rospy
+#from tmr_msgs.srv import *
 
-import sys
+#import os
+#import shutil
+#import sys
 import math
 import numpy as np
 
@@ -152,15 +154,16 @@ def pretty_xml(element, indent, newline, level = 0):
             subelement.tail = newline + indent * level    
         pretty_xml(subelement, indent, newline, level = level + 1)
 
-def modify_urdf(root, xyzs, rpys, udh):
+def modify_urdf(root, xyzs, rpys, udh, prefix=''):
+
     for elem in root.findall('joint'):
         for index in elem.attrib:
-            if index == 'name' and elem.attrib[index] == '${prefix}base_fixed_joint':
+            if index == 'name' and elem.attrib[index] == prefix + 'base_fixed_joint':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = '0.0 0.0 0.0'
                 origin.attrib['rpy'] = '0.0 0.0 0.0'
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_1':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_1':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[0, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[0, :], 8))
@@ -168,7 +171,7 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[0, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[0, _ULIM], 4))
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_2':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_2':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[1, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[1, :], 8))
@@ -176,7 +179,7 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[1, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[1, _ULIM], 4))
  
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_3':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_3':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[2, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[2, :], 8))
@@ -184,7 +187,7 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[2, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[2, _ULIM], 4))
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_4':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_4':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[3, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[3, :], 8))
@@ -192,7 +195,7 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[3, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[3, _ULIM], 4))
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_5':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_5':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[4, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[4, :], 8))
@@ -200,7 +203,7 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[4, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[4, _ULIM], 4))
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}joint_6':
+            elif index == 'name' and elem.attrib[index] == prefix + 'joint_6':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[5, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[5, :], 8))
@@ -208,86 +211,10 @@ def modify_urdf(root, xyzs, rpys, udh):
                 limit.attrib['lower'] = str(np.round(udh[5, _LLIM], 4))
                 limit.attrib['upper'] = str(np.round(udh[5, _ULIM], 4))
 
-            elif index == 'name' and elem.attrib[index] == '${prefix}flange_fixed_joint':
+            elif index == 'name' and elem.attrib[index] == prefix + 'flange_fixed_joint':
                 origin = elem.find('origin')
                 origin.attrib['xyz'] = str_from_nparray(np.round(xyzs[6, :], 8))
                 origin.attrib['rpy'] = str_from_nparray(np.round(rpys[6, :], 8))
 
     pretty_xml(root, '  ', '\n')
 
-
-def _gen_urdf():
-    rospy.init_node('modify_urdf')
-
-    if len(sys.argv) < 3:
-        rospy.logwarn('usage: modify_urdf model new_model')
-        return
-
-    model = sys.argv[1]
-    new_model = sys.argv[2]
-
-    rospy.wait_for_service('tmr/ask_item')
-    ask_item= rospy.ServiceProxy('tmr/ask_item', AskItem)
-    res_dh = ask_item('dh', 'DHTable', 1.0)
-    res_dd = ask_item('dd', 'DeltaDH', 1.0)
-
-    if not res_dh.startswith('DHTable={') or not tm_dh.endswith('}'):
-        rospy.logerr('invalid dh')
-        return
-    if not res_delta_dh.startswith('DeltaDH={') or not tm_delta_dh.endswith('}'):
-        rospy.logerr('invalid delta_dh')
-        return
-
-    dh_strs = res_dh[9:-1].split(',')
-    dd_strs = res_dd[9:-1].split(',')
-
-    if len(dh_strs) != 42:
-        rospy.logerr('invalid dh')
-        return
-    if len(dd_strs) != 30:
-        rospy.logerr('invalid delta_dh')
-        return
-
-    dh = [float(i) for i in dh_strs]
-    dd = [float(i) for i in dd_strs]
-
-    file_in = '../xacro/macro.' + model + '.urdf.xacro'
-    file_out = '../xacro/macro.' + new_model + '.urdf.xacro'
-    link_tag = '<!--LinkDescription-->'
-    link_head = '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n'
-    link_start = '<data xmlns:xacro="http://wiki.ros.org/xacro">'
-    link_end = '</data>'
-
-    fr = open(file_in, 'r')
-    data_in = fr.read()
-    fr.close()
-    datas = data_in.split(link_tag)
-
-    if len(datas) < 3:
-        rospy.logerr('invalid tmr...xacro')
-        return
-
-    link_data = link_start + datas[1] + link_end
-    root = ET.fromstring(link_data)
-
-    udh = urdf_DH_from_tm_DH(dh, dd)
-    xyzs, rpys = xyzrpys_from_urdf_DH(udh)
-    modify_urdf(root, xyzs, rpys, udh)
-
-    link_data = ET.tostring(root, encoding='UTF-8')
-    link_data = link_data.replace('ns0', 'xacro')
-    link_data = link_data.replace(link_head, '', 1)
-    link_data = link_data.replace(link_start, link_tag, 1)
-    link_data = link_data.replace(link_end, link_tag, 1)
-
-    data_out = datas[0] + link_data + datas[2]
-    fw = open(file_out, 'w')
-    fw.write(data_out)
-    fw.close()
-
-
-if __name__ == '__main__':
-    try:
-        _gen_urdf()
-    except rospy.ROSInterruptException:
-        pass

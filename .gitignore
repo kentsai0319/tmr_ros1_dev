@@ -32,4 +32,5 @@
 
 
 *.bak
+*.pyc
 .vscode/
