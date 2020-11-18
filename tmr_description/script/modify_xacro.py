@@ -7,7 +7,7 @@ import os
 import shutil
 import sys
 
-from modify_urdf import *
+from _modify_urdf import *
 
 def _gen_xarco():
     rospy.init_node('modify_xacro')
@@ -23,6 +23,7 @@ def _gen_xarco():
         if sys.argv[3].upper() == 'REPLACE':
             replace = True
             rospy.logwarn('origin xacro file will be replaced')
+
 
     rospy.wait_for_service('tmr/ask_item')
     ask_item = rospy.ServiceProxy('tmr/ask_item', AskItem)
@@ -41,6 +42,14 @@ def _gen_xarco():
 
     dh_strs = res_dh.value[9:-1].split(',')
     dd_strs = res_dd.value[9:-1].split(',')
+    '''
+    res_dh = 'DHTable={0,-90,0,145.1,0,-277,277,-90,0,429,0,0,-187,187,0,0,411.5,0,0,-162,162,90,90,0,-122.2,0,-187,187,0,90,0,106,0,-187,187,0,0,0,114.4,0,-277,277}'
+    res_dd = 'DeltaDH={-0.001059821,0.02508766,0.009534874,0,0.001116668,0.06614932,0.308224,0.0287381,0.06797475,-0.0319523,0.3752921,0.06614756,-0.006998898,0.06792655,-0.06083903,0.02092069,0.02965812,-0.1331249,0.06793034,0.02077797,0.08265772,0.03200645,0.01835932,0.06145732,0.08273286,0.6686108,0.6972408,-0.1793097,-0.0794057,1.425708}'
+    rospy.loginfo(res_dh)
+    rospy.loginfo(res_dd)
+    dh_strs = res_dh[9:-1].split(',')
+    dd_strs = res_dd[9:-1].split(',')
+    '''
 
     if len(dh_strs) != 42:
         rospy.logerr('invalid dh')
@@ -52,7 +61,26 @@ def _gen_xarco():
     dh = [float(i) for i in dh_strs]
     dd = [float(i) for i in dd_strs]
 
-    xacro_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/xacro'
+    # find xacro path
+    curr_path = os.path.dirname(os.path.abspath(__file__))
+    dirs = ['src', 'devel']
+    ind = -1
+    for d in dirs:
+        ind = curr_path.find(d)
+        if (ind != -1):
+            break
+    if (ind == -1) :
+        rospy.logerr('can not find workspace directory')
+        return
+    src_path = curr_path[:ind] + 'src'
+    xacro_path = ''
+    for dirpath, dirnames, filenames in os.walk(src_path):
+        if dirpath.endswith('tmr_description'):
+            xacro_path = dirpath + '/xacro'
+            break
+    if (xacro_path == ''):
+        rospy.logerr('can not find xacro directory')
+        return
 
     xacro_name = '/macro.' + model + '.urdf.xacro'
     new_xacro_name = '/macro.' + new_model + '.urdf.xacro'
@@ -83,7 +111,7 @@ def _gen_xarco():
     xyzs, rpys = xyzrpys_from_urdf_DH(udh)
     modify_urdf(root, xyzs, rpys, udh, '${prefix}')
 
-    link_data = ET.tostring(root, encoding='UTF-8')
+    link_data = ET.tostring(root, encoding='UTF-8').decode('UTF-8')
     link_data = link_data.replace('ns0', 'xacro')
     link_data = link_data.replace(link_head, '', 1)
     link_data = link_data.replace(link_start, link_tag, 1)
