@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tmr/tmr_print.h"
+#include "tmr/tmr_logger.h"
 #include "tmr/tmr_driver.h"
 
 #include <ros/ros.h>

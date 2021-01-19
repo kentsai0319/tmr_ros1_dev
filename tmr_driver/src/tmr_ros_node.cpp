@@ -496,6 +496,12 @@ void TmrRosNode::control_spin()
 
 ////////////////////////////////
 
+void _print_debug(const std::string &msg) { ROS_DEBUG_STREAM(msg); }
+void _print_info (const std::string &msg) { ROS_INFO_STREAM (msg); }
+void _print_warn (const std::string &msg) { ROS_WARN_STREAM (msg); }
+void _print_error(const std::string &msg) { ROS_ERROR_STREAM(msg); }
+void _print_fatal(const std::string &msg) { ROS_FATAL_STREAM(msg); }
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "tmr_driver");
@@ -527,6 +533,13 @@ int main(int argc, char **argv)
     }
     ROS_INFO_STREAM("TM_ROS: ip:=" << host);
   }
+
+  tmr::logger::ref().setup_level(tmr::logger::level::INFO);
+  tmr::logger::ref().setup_debug(_print_debug);
+  tmr::logger::ref().setup_info (_print_info);
+  tmr::logger::ref().setup_warn (_print_warn);
+  tmr::logger::ref().setup_error(_print_error);
+  tmr::logger::ref().setup_fatal(_print_fatal);
 
   tmr_ros::TmrRosNode robot(host, is_fake);
 

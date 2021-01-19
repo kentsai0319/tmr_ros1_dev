@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tmr_driver)
 
-add_definitions(-DROS_BUILD)
 add_definitions(-DUSE_BOOST)
 
 find_package(catkin REQUIRED COMPONENTS
