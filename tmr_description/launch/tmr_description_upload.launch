@@ -10,8 +10,8 @@
   <arg name="color" default="none" />
 
   <!-- Arm -->
-  <group if="$(eval arg('mobile') == 'none')">
-    <param name="/robot_description" command="$(find xacro)/xacro --inorder '$(find tmr_description)/xacro/$(arg model).urdf.xacro' ns:=$(arg ns) prefix:=$(arg prefix) gripper:=$(arg gripper) color:=$(arg color)" />
+  <group if="$(eval arg('mobile') == 'none')" ns="/$(arg ns)">
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find tmr_description)/xacro/$(arg model).urdf.xacro' ns:=$(arg ns) prefix:=$(arg prefix) gripper:=$(arg gripper) color:=$(arg color)" />
   </group>
 
   <!-- Arm + Mobile -->

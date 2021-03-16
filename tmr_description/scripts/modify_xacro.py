@@ -7,13 +7,13 @@ import os
 import shutil
 import sys
 
-from _modify_urdf import *
+from urdf_modification import *
 
-def _gen_urdf():
-    rospy.init_node('modify_urdf')
+def _gen_xarco():
+    rospy.init_node('modify_xacro')
 
     if len(sys.argv) < 3:
-        rospy.logwarn('usage: modify_urdf_node model new_model replace')
+        rospy.logwarn('usage: modify_xacro_node model new_model replace')
         return
 
     model = sys.argv[1]
@@ -22,7 +22,7 @@ def _gen_urdf():
     if len(sys.argv) == 4:
         if sys.argv[3].upper() == 'REPLACE':
             replace = True
-            rospy.logwarn('origin urdf file will be replaced')
+            rospy.logwarn('origin xacro file will be replaced')
 
 
     rospy.wait_for_service('tmr/ask_item')
@@ -61,7 +61,7 @@ def _gen_urdf():
     dh = [float(i) for i in dh_strs]
     dd = [float(i) for i in dd_strs]
 
-    # find urdf path
+    # find xacro path
     curr_path = os.path.dirname(os.path.abspath(__file__))
     dirs = ['src', 'devel']
     ind = -1
@@ -73,39 +73,56 @@ def _gen_urdf():
         rospy.logerr('can not find workspace directory')
         return
     src_path = curr_path[:ind] + 'src'
-    urdf_path = ''
+    xacro_path = ''
     for dirpath, dirnames, filenames in os.walk(src_path):
         if dirpath.endswith('tmr_description'):
-            urdf_path = dirpath + '/urdf'
+            xacro_path = dirpath + '/xacro'
             break
-    if (urdf_path == ''):
-        rospy.logerr('can not find urdf directory')
+    if (xacro_path == ''):
+        rospy.logerr('can not find xacro directory')
         return
 
-    urdf_name = '/' + model + '.urdf'
-    new_urdf_name = '/' + new_model + '.urdf'
+    xacro_name = '/macro.' + model + '.urdf.xacro'
+    new_xacro_name = '/macro.' + new_model + '.urdf.xacro'
 
-    file_in = urdf_path + urdf_name
-    file_out = urdf_path + new_urdf_name
+    file_in = xacro_path + xacro_name
+    file_out = xacro_path + new_xacro_name
+
+    link_tag = '<!--LinkDescription-->'
+    link_head = '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n'
+    link_start = '<data xmlns:xacro="http://wiki.ros.org/xacro">'
+    link_end = '</data>'
 
     rospy.loginfo(file_in)
 
     fr = open(file_in, 'r')
-    link_data = fr.read()
+    data_in = fr.read()
     fr.close()
+    datas = data_in.split(link_tag)
 
+    if len(datas) < 3:
+        rospy.logerr('invalid tmr...xacro')
+        return
+
+    link_data = link_start + datas[1] + link_end
     root = ET.fromstring(link_data)
 
     udh = urdf_DH_from_tm_DH(dh, dd)
     xyzs, rpys = xyzrpys_from_urdf_DH(udh)
-    modify_urdf(root, xyzs, rpys, udh)
+    modify_urdf(root, xyzs, rpys, udh, '${prefix}')
 
     link_data = ET.tostring(root, encoding='UTF-8').decode('UTF-8')
+    link_data = link_data.replace('ns0', 'xacro')
+    link_data = link_data.replace(link_head, '', 1)
+    link_data = link_data.replace(link_start, link_tag, 1)
+    link_data = link_data.replace(link_end, link_tag, 1)
+
+    data_out = datas[0] + link_data + datas[2]
 
     file_save = ''
     if replace:
         file_save = file_in
-        rospy.loginfo('copy and rename origin urdf file')
+        rospy.loginfo('copy and rename origin xacro file')
         shutil.copyfile(file_in, file_out)
     else:
         file_save = file_out
@@ -113,12 +130,12 @@ def _gen_urdf():
     rospy.loginfo(file_save)
 
     fw = open(file_save, 'w')
-    fw.write(link_data)
+    fw.write(data_out)
     fw.close()
 
 def main():
     try:
-        _gen_urdf()
+        _gen_xarco()
     except rospy.ROSInterruptException:
         pass
 

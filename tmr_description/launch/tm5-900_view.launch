@@ -8,6 +8,8 @@
 
   <arg name="color" default="none" />
 
+  <arg name="use_gui" default="true" />
+
   <include file="$(find tmr_description)/launch/tmr_description_upload.launch">
     <arg name="model" value="tm5-900" />
     <arg name="ns" value="$(arg ns)" />
@@ -17,11 +19,16 @@
     <arg name='color' value="$(arg color)" />
   </include>
 
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="use_gui" value="true" />
-  </node>
+  <!-- TODO: has ns ? remap? -->
+
+  <group unless="$(arg use_gui)">
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  </group>
+  <group if="$(arg use_gui)">
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+  </group>
+
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-  <!-- TODO: if ns, remap ? -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find tmr_description)/launch/view.rviz" required="true" />
 
