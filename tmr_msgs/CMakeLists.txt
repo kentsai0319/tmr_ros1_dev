@@ -11,16 +11,16 @@ add_message_files(
   FILES
   # RobotStatus
   FeedbackState.msg
-  SvrResponse.msg
-  SctResponse.msg
-  StaResponse.msg
+  TmsvrResponse.msg
+  TmsctResponse.msg
+  TmstaResponse.msg
   PvtPoint.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
-  ConnectTM.srv
+  ConnectTMR.srv
   WriteItem.srv
   AskItem.srv
   SendScript.srv

@@ -1,14 +1,13 @@
-
 #include "tmr_driver/tmr_ros_robot_hw.h"
 
-namespace tmr_hardware_interface
+namespace tmr_ros
 {
 
-TmrRobotHW::TmrRobotHW(ros::NodeHandle &nh, tmr::Driver* iface)
+TmrRobotHW::TmrRobotHW(ros::NodeHandle &nh, tmrl::driver::Driver *iface)
   : nh_(nh)
-  , robot(iface)
+  , robot_(iface)
+  , num_joints_(tmrl::driver::RobotState::DOF)
 {
-  //num_joints_ = robot->state.DOF;
 }
 
 bool TmrRobotHW::init(ros::NodeHandle& robot_nh, ros::NodeHandle& robot_hw_nh)
@@ -19,31 +18,19 @@ bool TmrRobotHW::init(ros::NodeHandle& robot_nh, ros::NodeHandle& robot_hw_nh)
   );
   robot_hw_nh.getParam("hardware_interface/joints", joint_names_);
   if (joint_names_.size() == 0) {
-    ROS_ERROR(
+    ROS_WARN(
       "TM_RHW: No joints found on parameter server for controller"
     );
     return false;
   }
-  if (joint_names_.size() != robot->state.DOF) {
+  if (joint_names_.size() != num_joints_) {
     ROS_ERROR(
       "TM_RHW: Number of joints is not equal to robot->state.DOF"
     );
     return false;
   }
-  num_joints_ = joint_names_.size();
 
-  boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-
-  // Resize vectors
-  joint_position_.resize(num_joints_);
-  joint_velocity_.resize(num_joints_);
-  joint_effort_.resize(num_joints_);
-  joint_position_command_.resize(num_joints_);
-  joint_velocity_command_.resize(num_joints_);
-
-  joint_pos_buf_.resize(num_joints_);
-  joint_vel_buf_.resize(num_joints_);
-  joint_tor_buf_.resize(num_joints_);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Initialize controller
   for (std::size_t i = 0; i < num_joints_; ++i) {
@@ -77,14 +64,13 @@ bool TmrRobotHW::init(ros::NodeHandle& robot_nh, ros::NodeHandle& robot_hw_nh)
 
 void TmrRobotHW::read(const ros::Time& time, const ros::Duration& period)
 {
-  {
-    std::lock_guard<std::mutex> lck(robot->state.mtx);
-    joint_pos_buf_ = robot->state.joint_angle();
-    joint_vel_buf_ = robot->state.joint_speed();
-    joint_tor_buf_ = robot->state.joint_torque();
-  }
+  tmrl::driver::RobotState::Ulock lck(robot_->state.mtx);
+  joint_pos_buf_ = robot_->state.joint_angle();
+  joint_vel_buf_ = robot_->state.joint_speed();
+  joint_tor_buf_ = robot_->state.joint_torque();
+  lck.unlock();
 
-  for (std::size_t i = 0; i < num_joints_; ++i) {
+  for (std::size_t i = 0; i < tmrl::driver::RobotState::DOF; ++i) {
     joint_position_[i] = joint_pos_buf_[i];
     joint_velocity_[i] = joint_vel_buf_[i];
     joint_effort_[i] = joint_tor_buf_[i];
@@ -113,18 +99,18 @@ void TmrRobotHW::write(const ros::Time& time, const ros::Duration& period)
     // position mode: ...
 
     // velocity mode:
-    std::vector<double> zero_vel(num_joints_, 0.0);
+    tmrl::vector6d zeros{0}; //std::vector<double> zero_vel(num_joints_, 0.0);
     // leave velocity mode
     if (running_iface_last_ == VELOCITY_IFACE) {
-      robot->set_vel_mode_target(tmr::VelMode::Joint, zero_vel);
-      robot->set_vel_mode_stop();
+      robot_->set_vel_mode_target(tmrl::driver::VelMode::Joint, zeros);
+      robot_->set_vel_mode_stop();
       ROS_INFO("TM_RHW: leave velocity mode");
     }
     // enter velocity mode
     if (running_iface_ == VELOCITY_IFACE) {
       ROS_INFO("TM_RHW: enter velocity mode");
-      robot->set_vel_mode_start(tmr::VelMode::Joint, 0.1, 1.0);
-      robot->set_vel_mode_target(tmr::VelMode::Joint, zero_vel);
+      robot_->set_vel_mode_start(tmrl::driver::VelMode::Joint, 0.1, 1.0);
+      robot_->set_vel_mode_target(tmrl::driver::VelMode::Joint, zeros);
     }
   }
   running_iface_last_ = running_iface_;
@@ -134,7 +120,7 @@ void TmrRobotHW::write(const ros::Time& time, const ros::Duration& period)
 
     break;
   case VELOCITY_IFACE:
-    robot->set_vel_mode_target(tmr::VelMode::Joint, joint_velocity_command_);
+    robot_->set_vel_mode_target(tmrl::driver::VelMode::Joint, joint_velocity_command_);
     break;
   }
 }
@@ -174,8 +160,9 @@ void TmrRobotHW::halt()
   running_iface_ = NO_IFACE;
 
   if (running_iface_last_ == VELOCITY_IFACE) {
-    robot->set_vel_mode_stop();
+    robot_->set_vel_mode_stop();
   }
 }
+
 
 }

@@ -61,11 +61,11 @@ catkin_package(
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-#CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX11)
   set(CMAKE_CXX_FLAGS "-std=c++11")
-#elseif(COMPILER_SUPPORTS_CXX0X)
-#  set(CMAKE_CXX_FLAGS "-std=c++0x")
+elseif(COMPILER_SUPPORTS_CXX14)
+  set(CMAKE_CXX_FLAGS "-std=c++14")
 else()
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif()
@@ -90,10 +90,11 @@ include_directories(include
 ## Declare a C++ executable
 add_executable(tmr_driver
   src/tmr_ros_node.cpp
-  src/tmr_ros_service_sct.cpp
-  src/tmr_ros_service_svr.cpp
-  src/tmr_ros_topic_sct.cpp
-  src/tmr_ros_topic_svr.cpp
+  src/tmr_ros_traj_as.cpp
+  src/tmr_ros_svr_pub.cpp
+  src/tmr_ros_svr_srv.cpp
+  src/tmr_ros_sct_pub.cpp
+  src/tmr_ros_sct_srv.cpp
   src/tmr_ros_robot_hw.cpp
 )
 

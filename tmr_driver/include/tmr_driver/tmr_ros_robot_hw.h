@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tmr/tmr_logger.h"
-#include "tmr/tmr_driver.h"
+#include "tmrl/driver/driver.h"
+#include "tmrl/utils/logger.h"
 
 #include <ros/ros.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -10,8 +10,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <controller_manager/controller_manager.h>
 
-
-namespace tmr_hardware_interface
+namespace tmr_ros
 {
 
 /// \brief Hardware interface for a tm-robot
@@ -23,12 +22,15 @@ public:
     POSITION_IFACE,
     VELOCITY_IFACE
   };
+  enum {
+    DOF = 6
+  };
 
   /**
    * \brief Constructor
    * \param nh - Node handle for topics.
    */
-  TmrRobotHW(ros::NodeHandle &nh, tmr::Driver *iface);
+  TmrRobotHW(ros::NodeHandle &nh, tmrl::driver::Driver *iface);
   virtual ~TmrRobotHW() = default;
 
   /// \brief Initialize the hardware interface
@@ -50,9 +52,9 @@ private:
   // Startup and shutdown of the internal node inside a roscpp program
   ros::NodeHandle nh_;
 
-  tmr::Driver *robot;
+  tmrl::driver::Driver *robot_;
 
-  bool is_fake_;
+  const std::size_t num_joints_;
 
   IFace running_iface_ = NO_IFACE;
   IFace running_iface_last_ = NO_IFACE;
@@ -68,16 +70,15 @@ private:
 
   // Shared memory !!
   std::vector<std::string> joint_names_;
-  std::vector<double> joint_position_;
-  std::vector<double> joint_velocity_;
-  std::vector<double> joint_effort_;
-  std::vector<double> joint_position_command_;
-  std::vector<double> joint_velocity_command_;
-  std::size_t num_joints_;
+  tmrl::vector6d joint_position_ {0};
+  tmrl::vector6d joint_velocity_ {0};
+  tmrl::vector6d joint_effort_ {0};
+  tmrl::vector6d joint_position_command_ {0};
+  tmrl::vector6d joint_velocity_command_ {0};
 
-  std::vector<double> joint_pos_buf_;
-  std::vector<double> joint_vel_buf_;
-  std::vector<double> joint_tor_buf_;
+  tmrl::vector6d joint_pos_buf_ {0};
+  tmrl::vector6d joint_vel_buf_ {0};
+  tmrl::vector6d joint_tor_buf_ {0};
 };
 
 }

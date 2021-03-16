@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <launch>
 
   <!-- specify the planning pipeline -->
@@ -12,8 +14,9 @@
   <arg name="debug" default="false" />
 
 
-  <arg name="sim" default="true" />
-  <arg name="ip" unless="$(arg sim)" />
+  <arg name="sim" default="false" />
+  <arg name="robot_ip" unless="$(arg sim)" />
+  <arg name="load_controller" default="false" />
 
 
   <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
@@ -27,7 +30,8 @@
   <!-- We do not have a robot connected, so publish fake joint states -->
   <include file="$(find tmr_driver)/launch/tm5-900_driver.launch">
     <arg name="sim" value="$(arg sim)" />
-    <arg name="ip" value="$(arg ip)" unless="$(arg sim)" />
+    <arg name="robot_ip" value="$(arg robot_ip)" unless="$(arg sim)" />
+    <arg name="load_controller" value="$(arg load_controller)" />
   </include>
 
   <!-- Given the published joint states, publish tf for the robot links -->
