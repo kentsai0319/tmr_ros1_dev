@@ -63,7 +63,7 @@ bool TmrRosNode::set_positions(tmr_msgs::SetPositionsRequest &req, tmr_msgs::Set
     break;
   case tmr_msgs::SetPositionsRequest::LINE_T:
     rb = iface_.set_tool_pose_Line(tmrl::to_arrayd<dof>(req.positions),
-      (int)(req.velocity), req.acc_time, req.blend_percentage, req.fine_goal);
+      req.velocity, req.acc_time, req.blend_percentage, req.fine_goal);
     break;
   }
   res.ok = rb;

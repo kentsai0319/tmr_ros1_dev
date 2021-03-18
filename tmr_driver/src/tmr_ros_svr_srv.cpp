@@ -32,13 +32,14 @@ bool TmrRosNode::connect_tmr(tmr_msgs::ConnectTMRRequest &req, tmr_msgs::Connect
       rb = client->start(t_o);
     }
     if (req.reconnect) {
-      // set to tv
-      tmrl_INFO_STREAM("TM_ROS: set " << hdr << " reconnect timeout " << t_o << "ms, timeval" << t_v << "ms");
+      client->set_reconnect_timeout(req.timeout);
+      client->set_reconnect_timeval(req.timeval);
+      tmrl_INFO_STREAM("TM_ROS: set " << hdr << " reconnect timeout " << t_o << "ms, timeval " << t_v << "ms");
     }
     else {
       // no reconnect
       client->set_reconnect_timeval(-1);
-      tmrl_INFO_STREAM("TM_ROS: " << hdr << " set NOT reconnect");
+      tmrl_INFO_STREAM("TM_ROS: set " << hdr << " NOT reconnect");
     }
   }
   else {

@@ -53,7 +53,7 @@ private:
   void fake_feedback();
 
   void feedbackCB(const tmrl::driver::RobotState &rs);
-  void tmsvrCB(const tmrl::comm::TmsvrPacket &svr);
+  void tmsvrCB(const tmrl::comm::TmsvrPacket &pack);
 
   void tmsctCB(const tmrl::comm::TmsctPacket &pack);
   void tmstaCB(const tmrl::comm::TmstaPacket &pack);

@@ -14,6 +14,7 @@ void TmrRosNode::tmsctCB(const tmrl::comm::TmsctPacket &pack)
   pm.sct_msg.id = pack.id();
   pm.sct_msg.script = pack.script();
 
+  sct_updated_ = true;
   lck.unlock();
   sct_cv_.notify_all();
 
@@ -36,13 +37,14 @@ void TmrRosNode::tmstaCB(const tmrl::comm::TmstaPacket &pack)
   pm.sta_msg.subcmd = pack.subcmd();
   pm.sta_msg.subdata = pack.subdata();
 
+  sta_updated_ = true;
   lck.unlock();
   sta_cv_.notify_all();
 
   tmrl_INFO_STREAM("$TMSTA: res: " << pm.sta_msg.subcmd << ", " << pm.sta_msg.subdata);
 
   pm.sta_msg.header.stamp = ros::Time::now();
-  pm.sta_pub.publish(pm.sct_msg);
+  pm.sta_pub.publish(pm.sta_msg);
 }
 
 }

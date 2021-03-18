@@ -116,8 +116,8 @@ void TmrRosNode::tmsvrCB(const tmrl::comm::TmsvrPacket &pack)
   pm.svr_msg.mode = (int)(pack.mode());
   pm.svr_msg.content = pack.content();
   pm.svr_msg.error_code = (int)(pack.errcode());
-  svr_updated_ = true;
 
+  svr_updated_ = true;
   lck.unlock();
   svr_cv_.notify_all();
 
