@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>tmr_gazebo</name>
+  <version>1.1.0</version>
+  <description>
+    Gazebo wrapper for TechMan Robot arms
+  </description>
+
+  <author email="ken.tsai@tm-robot.com">Ken Tsai</author>
+  <maintainer email="ken.tsai@tm-robot.com">Ken Tsai</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>effort_controllers</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_ros_control</exec_depend>
+  <exec_depend>hardware_interface</exec_depend>
+  <exec_depend>joint_state_controller</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
+  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>ros_controllers</exec_depend>
+  <exec_depend>rostopic</exec_depend>
+
+  <exec_depend>tmr_description</exec_depend>
+
+  <export>
+  </export>
+</package>

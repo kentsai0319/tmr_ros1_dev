@@ -20,9 +20,10 @@
 
 
   <!-- Load the URDF, SRDF and other .yaml configuration files on the param server -->
-  <include file="$(find tmr_moveit_config_tm5-900)/launch/planning_context.launch">
+  <!--include file="$(find tmr_moveit_config_tm5-900)/launch/planning_context.launch">
     <arg name="load_robot_description" value="true"/>
-  </include>
+  </include-->
+  <param name="robot_description" command="xacro  '$(find tmr_description)/xacro/tm5-900.urdf.xacro'"/>
 
   <!-- If needed, broadcast static tf for robot root -->
 
@@ -43,6 +44,7 @@
     <arg name="fake_execution" value="false"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
+    <arg name="load_robot_description" value="false"/>
     <arg name="pipeline" value="$(arg pipeline)"/>
   </include>
 

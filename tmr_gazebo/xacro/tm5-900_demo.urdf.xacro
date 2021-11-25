@@ -1,0 +1,387 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="tm5-900">
+
+  <xacro:arg name="ns" default="" />
+  <xacro:arg name="prefix" default="" />
+
+  <!--xacro:arg name="gripper" default="none" /-->
+
+  <xacro:arg name="trans_hw_iface" default="hardware_interface/PositionJointInterface" />
+
+  <xacro:include filename="$(find tmr_description)/xacro/macro.gazebo.xacro" />
+  <xacro:include filename="$(find tmr_description)/xacro/macro.transmission.xacro" />
+  <xacro:include filename="$(find tmr_description)/xacro/macro.materials.xacro" />
+
+  <!-- tm5-900 -->
+  <xacro:include filename="$(find tmr_description)/xacro/macro.tm5-900.urdf.xacro" />
+
+  <!--  -->
+  <xacro:tmr_transmission prefix="$(arg prefix)" hw_iface="$(arg trans_hw_iface)" />
+  <xacro:tmr_gazebo ns="$(arg ns)" prefix="$(arg prefix)" />
+  <xacro:tmr_materials/>
+
+  <!-- Arm -->
+  <xacro:tm5-900 ns="$(arg ns)" prefix="$(arg prefix)" color="grey" format="stl" />
+
+  <!-- rg2_gripper -->
+
+  <xacro:property name="prefix" value="$(arg prefix)"/>
+
+  <gazebo reference="${prefix}link_1">
+    <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <link name="gcp">
+    <visual>
+      <geometry>
+        <mesh filename="package://tmr_description/meshes/gripper/rg2/dae_rg2_.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0.009 -0.146" rpy="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://tmr_description/meshes/gripper/rg2/rg2_.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0.009 -0.146" rpy="0 0 0"/>
+    </collision>
+  </link>
+  <joint name="gcp_fixed_joint" type="fixed">
+    <parent link="flange"/>
+    <child link="gcp"/>
+    <origin xyz="0 0 0.196" rpy="0 0 0"/>
+  </joint>
+
+  <!-- camera -->
+  <gazebo reference="eye_in_hand_camera_link">
+    <sensor type="camera" name="eye_in_hand_camera">
+      <update_rate>10.0</update_rate>
+      <camera name="hand">
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>10.0</updateRate>
+        <cameraName>eye_in_hand_camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>eye_in_hand_camera_optical_frame</frameName>
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- openni plugin and rgbd senser -->
+  <gazebo reference="rgbd_sensor_rgb_frame">
+    <sensor type="depth" name="rgbd_camera">
+      <always_on>true</always_on>
+      <update_rate>5.0</update_rate>
+      <camera>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <format>B8G8R8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="$kinect_controller" filename="libgazebo_ros_openni_kinect.so">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>5.0</updateRate>
+        <cameraName>rgbd_camera</cameraName>
+        <imageTopicName>/rgbd_camera/rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>/rgbd_camera/rgb/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/rgbd_camera/depth/image_raw</depthImageTopicName>
+        <depthImageInfoTopicName>/rgbd_camera/depth/camera_info</depthImageInfoTopicName>
+        <pointCloudTopicName>/rgbd_camera/depth/points</pointCloudTopicName>
+        <frameName>rgbd_sensor_rgb_optical_frame</frameName>
+        <pointCloudCutoff>0.5</pointCloudCutoff>
+        <distortionK1>0.0000000</distortionK1>
+        <distortionK2>0.0000000</distortionK2>
+        <distortionK3>0.0000000</distortionK3>
+        <distortionT1>0.0000000</distortionT1>
+        <distortionT2>0.0000000</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="rgbd_sensor_rgb_frame_2">
+    <sensor type="depth" name="rgbd_camera_2">
+      <always_on>true</always_on>
+      <update_rate>5.0</update_rate>
+      <camera>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <format>B8G8R8</format>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="$kinect_controller" filename="libgazebo_ros_openni_kinect.so">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>5.0</updateRate>
+        <cameraName>rgbd_camera_2</cameraName>
+        <imageTopicName>/rgbd_camera_2/rgb/image_raw</imageTopicName>
+        <cameraInfoTopicName>/rgbd_camera_2/rgb/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/rgbd_camera_2/depth/image_raw</depthImageTopicName>
+        <depthImageInfoTopicName>/rgbd_camera_2/depth/camera_info</depthImageInfoTopicName>
+        <pointCloudTopicName>/rgbd_camera_2/depth/points</pointCloudTopicName>
+        <frameName>rgbd_sensor_rgb_optical_frame_2</frameName>
+        <pointCloudCutoff>0.5</pointCloudCutoff>
+        <distortionK1>0.0000000</distortionK1>
+        <distortionK2>0.0000000</distortionK2>
+        <distortionK3>0.0000000</distortionK3>
+        <distortionT1>0.0000000</distortionT1>
+        <distortionT2>0.0000000</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!--xacro:property name="hw_iface" value="$(arg trans_hw_iface)"/-->
+
+  <!--transmission name="rgbd_sensor_stage_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rgbd_sensor_stage_joint">
+      <hardwareInterface>${hw_iface}</hardwareInterface>
+    </joint>
+    <actuator name="rgbd_sensor_stage_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="rgbd_sensor_stage_trans_2">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="rgbd_sensor_stage_joint_2">
+      <hardwareInterface>${hw_iface}</hardwareInterface>
+    </joint>
+    <actuator name="rgbd_sensor_stage_motor_2">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="eye_in_hand_camera_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="eye_in_hand_camera_joint">
+      <hardwareInterface>${hw_iface}</hardwareInterface>
+    </joint>
+    <actuator name="eye_in_hand_camera_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission-->
+
+  <!-- world and demo stage-->
+
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link="$(arg prefix)base"/>
+    <origin xyz="0 0 1" rpy="0 0 0"/>
+  </joint>
+
+  <link name="robot_stage" >
+    <!--visual>
+      <geometry>
+        <box size="1 1 1"/>
+      </geometry>
+      <material name="stage_wood">
+        <color rgba="1.0 0.87 0.68 1.0"/>
+      </material>
+    </visual-->
+    <!--collision>
+      <geometry>
+        <box size="1 1 1"/>
+      </geometry>
+    </collision-->
+  </link>
+  <joint name="stage_fixed_joint" type="fixed">
+    <parent link="world" />
+    <child link = "robot_stage" />
+    <origin xyz="0.1 0.0 0.5" rpy="0 0 0" />
+  </joint>
+
+  <link name="rgbd_sensor_stage">
+    <!--visual>
+      <geometry>
+        <box size="0.04 0.04 0.04"/>
+      </geometry>
+    </visual-->
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+  <joint name="rgbd_sensor_stage_joint" type="fixed">
+    <parent link="$(arg prefix)base" />
+    <child link="rgbd_sensor_stage" />
+    <origin xyz="1.0 -1.0 2.0" rpy="0.0 0.7854 2.618" />
+    <!--axis xyz="0 0 1" />  
+    <limit lower="0" upper="0" effort="0.001" velocity="0.001" /-->
+  </joint>
+
+  <link name="rgbd_sensor_stage_2">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+  <joint name="rgbd_sensor_stage_joint_2" type="fixed">
+    <parent link="$(arg prefix)base" />
+    <child link="rgbd_sensor_stage_2" />
+    <origin xyz="1.0 1.0 2.0" rpy="0.0 0.7854 -2.618" />
+    <!--axis xyz="0 0 1" />  
+    <limit lower="0" upper="0" effort="0.001" velocity="0.001" /-->
+  </joint>
+
+  <!-- rgbd sensor (kinect) -->
+
+  <link name="rgbd_sensor_link">
+    <visual>
+      <geometry>
+        <box size="0.073 0.28 0.073"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="rgbd_sensor_joint" type="fixed">
+    <parent link="rgbd_sensor_stage" />
+    <child link="rgbd_sensor_link" />
+    <origin xyz="-0.0365 0 0.0365" rpy="0 0 0" />
+  </joint>
+
+  <link name="rgbd_sensor_depth_frame" />
+  <joint name="rgbd_sensor_depth_joint" type="fixed">
+    <parent link="rgbd_sensor_link" />
+    <child link="rgbd_sensor_depth_frame" />
+    <origin xyz="0.031 0.0125 0.016" rpy="0 0 0" />
+  </joint>
+  
+  <link name="rgbd_sensor_depth_optical_frame" />
+  <joint name="rgbd_sensor_depth_optical_joint" type="fixed">
+    <parent link="rgbd_sensor_depth_frame" />
+    <child link="rgbd_sensor_depth_optical_frame" />
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+  </joint>
+
+  <link name="rgbd_sensor_rgb_frame" />
+  <joint name="rgbd_sensor_rgb_joint" type="fixed">
+    <parent link="rgbd_sensor_link" />
+    <child link="rgbd_sensor_rgb_frame" />
+    <origin xyz="0.031 -0.0125 0.016" rpy="0 0 0" />
+  </joint>
+  
+  <link name="rgbd_sensor_rgb_optical_frame" />
+  <joint name="rgbd_sensor_rgb_optical_joint" type="fixed">
+    <parent link="rgbd_sensor_rgb_frame" />
+    <child link="rgbd_sensor_rgb_optical_frame" />
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+  </joint>
+
+  <!-- rgbd sensor (kinect) 2nd -->
+  <link name="rgbd_sensor_link_2">
+    <visual>
+      <geometry>
+        <box size="0.073 0.28 0.073"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="rgbd_sensor_joint_2" type="fixed">
+    <parent link="rgbd_sensor_stage_2" />
+    <child link="rgbd_sensor_link_2" />
+    <origin xyz="-0.0365 0 0.0365" rpy="0 0 0" />
+  </joint>
+
+  <link name="rgbd_sensor_depth_frame_2" />
+  <joint name="rgbd_sensor_depth_joint_2" type="fixed">
+    <parent link="rgbd_sensor_link_2" />
+    <child link="rgbd_sensor_depth_frame_2" />
+    <origin xyz="0.031 0.0125 0.016" rpy="0 0 0" />
+  </joint>
+  
+  <link name="rgbd_sensor_depth_optical_frame_2" />
+  <joint name="rgbd_sensor_depth_optical_joint_2" type="fixed">
+    <parent link="rgbd_sensor_depth_frame_2" />
+    <child link="rgbd_sensor_depth_optical_frame_2" />
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+  </joint>
+
+  <link name="rgbd_sensor_rgb_frame_2" />
+  <joint name="rgbd_sensor_rgb_joint_2" type="fixed">
+    <parent link="rgbd_sensor_link_2" />
+    <child link="rgbd_sensor_rgb_frame_2" />
+    <origin xyz="0.031 -0.0125 0.016" rpy="0 0 0" />
+  </joint>
+  
+  <link name="rgbd_sensor_rgb_optical_frame_2" />
+  <joint name="rgbd_sensor_rgb_optical_joint_2" type="fixed">
+    <parent link="rgbd_sensor_rgb_frame_2" />
+    <child link="rgbd_sensor_rgb_optical_frame_2" />
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+  </joint>
+
+  <!-- eye in hand camera-->
+
+  <link name="eye_in_hand_camera_link">
+    <inertial>
+      <mass value="0.01" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.0001" ixy="0.0" ixz="0.0"
+               iyy="0.0001" iyz="0.0"
+               izz="0.0001" />
+    </inertial>
+  </link>
+  <joint name="eye_in_hand_camera_joint" type="fixed">
+    <parent link="link_6" />
+    <child link="eye_in_hand_camera_link" />
+    <origin xyz="0 0.08 0.1" rpy="-1.57079632679 -1.57079632679 0" />
+    <!--axis xyz="0 0 1" />  
+    <limit lower="0" upper="0" effort="0.001" velocity="0.001" /-->
+  </joint>
+
+  <link name="eye_in_hand_camera_optical_frame" />
+  <joint name="eye_in_hand_camera_optical_joint" type="fixed">
+    <parent link="eye_in_hand_camera_link" />
+    <child link="eye_in_hand_camera_optical_frame" />
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679" />
+  </joint>
+
+</robot>

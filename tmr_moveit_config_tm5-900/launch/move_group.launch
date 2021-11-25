@@ -38,9 +38,11 @@
   -->
 
   <arg name="load_robot_description" default="true" />
+  <arg name="load_semantic_description" default="true" />
   <!-- load URDF, SRDF and joint_limits configuration -->
   <include file="$(find tmr_moveit_config_tm5-900)/launch/planning_context.launch">
     <arg name="load_robot_description" value="$(arg load_robot_description)" />
+    <arg name="load_semantic_description" value="$(arg load_semantic_description)" />
   </include>
 
   <!-- Planning Functionality -->

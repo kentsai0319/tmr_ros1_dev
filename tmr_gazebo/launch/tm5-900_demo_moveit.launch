@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+
+  <node name="point_cloud_relay_1" pkg="topic_tools" type="relay" args="/rgbd_camera/depth/points /rgbd_common/depth/points">
+  </node>
+  <node name="point_cloud_relay_2" pkg="topic_tools" type="relay" args="/rgbd_camera_2/depth/points /rgbd_common/depth/points">
+  </node>
+
+  <!-- The semantic description that corresponds to the URDF -->
+  <param name="robot_description_semantic" textfile="$(find tmr_gazebo)/config/tm5-900_demo.srdf" />
+
+  <remap from="/follow_joint_trajectory" to="/arm_controller/follow_joint_trajectory"/>
+
+  <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+  <include file="$(find tmr_moveit_config_tm5-900)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="false"/>
+    <arg name="pipeline" value="ompl"/>
+    <arg name="load_robot_description" value="false"/>
+    <arg name="load_semantic_description" value="false"/>
+  </include>
+
+  <!-- Run Rviz and load the default config to see the state of the move_group node -->
+  <include file="$(find tmr_moveit_config_tm5-900)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(find tmr_gazebo)/launch/moveit.rviz"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+</launch>
