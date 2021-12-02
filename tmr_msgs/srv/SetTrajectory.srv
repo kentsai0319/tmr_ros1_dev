@@ -1,0 +1,7 @@
+int8 JOINT = 0
+int8 TOOL = 1
+
+PvtPoint[] points
+int8 mode
+---
+bool ok

@@ -28,6 +28,8 @@ add_service_files(
   SetIO.srv
   #SetPayload.srv
   SetPositions.srv
+  SetPvtPoint.srv
+  SetTrajectory.srv
   AskSta.srv
 )
 

@@ -15,7 +15,7 @@
 
   <arg name="max_payload" default="4.0" />
 
-  <arg name="load_controller" default="false" />
+  <arg name="load_controller" default="true" />
 
   <arg name="load_description" default="false" />
 

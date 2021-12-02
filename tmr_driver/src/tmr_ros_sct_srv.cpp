@@ -52,7 +52,7 @@ bool TmrRosNode::set_positions(tmr_msgs::SetPositionsRequest &req, tmr_msgs::Set
   if (req.positions.size() != dof) {
     return rb;
   }
-  switch(req.motion_type) {
+  switch (req.motion_type) {
   case tmr_msgs::SetPositionsRequest::PTP_J:
     rb = iface_.set_joint_pos_PTP(tmrl::to_arrayd<dof>(req.positions),
       (int)(req.velocity), req.acc_time, req.blend_percentage, req.fine_goal);
@@ -66,6 +66,59 @@ bool TmrRosNode::set_positions(tmr_msgs::SetPositionsRequest &req, tmr_msgs::Set
       req.velocity, req.acc_time, req.blend_percentage, req.fine_goal);
     break;
   }
+  res.ok = rb;
+  return rb;
+}
+bool TmrRosNode::set_pvt(tmr_msgs::SetPvtPointRequest &req, tmr_msgs::SetPvtPointResponse &res)
+{
+  bool rb = false;
+  tmrl::driver::PvtPoint point;
+  point.positions = req.point.positions;
+  point.velocities = req.point.velocities;
+  point.time = req.point.time;
+
+  switch (req.point.mode) {
+  case tmr_msgs::PvtPoint::JOINT:
+    rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Joint, point);
+    break;
+  case tmr_msgs::PvtPoint::TOOL:
+    rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Tool, point);
+    break;
+  case tmr_msgs::PvtPoint::EXIT:
+    rb = iface_.set_pvt_exit();
+    break;
+  case tmr_msgs::PvtPoint::ENTER_TOOL:
+    rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Tool);
+    break;
+  case tmr_msgs::PvtPoint::ENTER_JOINT:
+    rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Joint);
+    break;
+  }
+  res.ok = rb;
+  return rb;
+}
+bool TmrRosNode::set_trajectory(tmr_msgs::SetTrajectoryRequest &req, tmr_msgs::SetTrajectoryResponse &res)
+{
+  bool rb = false;
+  tmrl::driver::PvtTraj traj;
+
+  if (req.mode == tmr_msgs::SetTrajectoryRequest::JOINT) {
+    traj.mode = tmrl::driver::PvtMode::Joint;
+  }
+  else {
+    traj.mode = tmrl::driver::PvtMode::Tool;
+  }
+  double tt = 0.0;
+  traj.points.resize(req.points.size());
+  for (std::size_t i = 0; i < req.points.size(); ++i) {
+    traj.points[i].positions = req.points[i].positions;
+    traj.points[i].velocities = req.points[i].velocities;
+    traj.points[i].time = req.points[i].time;
+    tt += traj.points[i].time;
+  }
+  traj.total_time = tt;
+
+  rb = iface_.set_pvt_traj(traj);
   res.ok = rb;
   return rb;
 }

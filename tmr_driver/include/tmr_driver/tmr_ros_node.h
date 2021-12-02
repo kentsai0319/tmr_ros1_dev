@@ -25,6 +25,8 @@
 #include "tmr_msgs/SetIO.h"
 //#include "tmr_msgs/SetPayload"
 #include "tmr_msgs/SetPositions.h"
+#include "tmr_msgs/SetPvtPoint.h"
+#include "tmr_msgs/SetTrajectory.h"
 #include "tmr_msgs/AskSta.h"
 
 #include "tmr_driver/tmr_ros_robot_hw.h"
@@ -104,6 +106,9 @@ private:
   bool set_io(tmr_msgs::SetIORequest &req, tmr_msgs::SetIOResponse &res);
 
   bool set_positions(tmr_msgs::SetPositionsRequest &req, tmr_msgs::SetPositionsResponse &res);
+
+  bool set_pvt(tmr_msgs::SetPvtPointRequest &req, tmr_msgs::SetPvtPointResponse &res);
+  bool set_trajectory(tmr_msgs::SetTrajectoryRequest &req, tmr_msgs::SetTrajectoryResponse &res);
 
   bool ask_sta(tmr_msgs::AskStaRequest &req, tmr_msgs::AskStaResponse &res);
 
@@ -205,6 +210,9 @@ protected:
   ros::ServiceServer set_io_srv_;
 
   ros::ServiceServer set_positions_srv_;
+
+  ros::ServiceServer set_pvt_srv_;
+  ros::ServiceServer set_traj_srv_;
 
   ros::ServiceServer ask_sta_srv_;
 
