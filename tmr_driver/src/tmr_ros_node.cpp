@@ -16,19 +16,21 @@ TmrRosNode::TmrRosNode(const std::string &host, bool is_fake)
       false)
   , has_goal_(false)
 {
-  ROS_INFO_STREAM("TM_ROS: Namespace: " << nh_.getNamespace());
+  ns_ = nh_.getNamespace();
+  ROS_INFO_STREAM("TM_ROS: Namespace: " << ns_);
+  ROS_INFO_STREAM("TM_ROS: Set ns. to " << ns_);
 
   ////////////////////////////////
   // Params
   ////////////////////////////////
 
-  ns_ = "";
-  if (ros::param::get("~ns", ns_)) {
-    ROS_INFO_STREAM("TM_ROS: Set ns. to " << ns_);
-  }
-  else {
-    ROS_INFO_STREAM("TM_ROS: No ns. param.");
-  }
+  // ns_ = "";
+  // if (ros::param::get("~ns", ns_)) {
+  //   ROS_INFO_STREAM("TM_ROS: Set ns. to " << ns_);
+  // }
+  // else {
+  //   ROS_INFO_STREAM("TM_ROS: No ns. param.");
+  // }
   prefix_ = "";
   if (ros::param::get("~prefix", prefix_)) {
     ROS_INFO_STREAM("TM_ROS: Set prefix to " << prefix_);
@@ -70,16 +72,16 @@ TmrRosNode::TmrRosNode(const std::string &host, bool is_fake)
   svr_pm_.joint_msg.name = joint_names_;
   svr_pm_.tool_pose_msg.header.frame_id = base_frame_name_;
 
-  svr_pm_.fbs_pub = nh_.advertise<tmr_msgs::FeedbackState>(ns_ + "feedback_state", 1);
-  svr_pm_.joint_pub = nh_.advertise<sensor_msgs::JointState>(ns_ + "joint_states", 1);
-  svr_pm_.tool_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>(ns_ + "tool_pose", 1);
+  svr_pm_.fbs_pub = nh_.advertise<tmr_msgs::FeedbackState>("feedback_state", 1);
+  svr_pm_.joint_pub = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+  svr_pm_.tool_pose_pub = nh_.advertise<geometry_msgs::PoseStamped>("tool_pose", 1);
 
   if (!is_fake_) {
-    svr_pm_.svr_pub = nh_.advertise<tmr_msgs::TmsvrResponse>(ns_ + "tmsvr_response", 1);
+    svr_pm_.svr_pub = nh_.advertise<tmr_msgs::TmsvrResponse>("tmsvr_response", 1);
 
     // for TMSCT
-    sct_pm_.sct_pub = nh_.advertise<tmr_msgs::TmsctResponse>(ns_ + "tmsct_response", 1);
-    sct_pm_.sta_pub = nh_.advertise<tmr_msgs::TmstaResponse>(ns_ + "tmsta_response", 1);
+    sct_pm_.sct_pub = nh_.advertise<tmr_msgs::TmsctResponse>("tmsct_response", 1);
+    sct_pm_.sta_pub = nh_.advertise<tmr_msgs::TmstaResponse>("tmsta_response", 1);
   }
 
   if (!is_fake) {
@@ -112,25 +114,25 @@ TmrRosNode::TmrRosNode(const std::string &host, bool is_fake)
 
   if (!is_fake_) {
     // for connection
-    connect_srv_ = nh_.advertiseService(ns_ + "tmr/connect_tm", &TmrRosNode::connect_tmr, this);
+    connect_srv_ = nh_.advertiseService("tmr/connect_tm", &TmrRosNode::connect_tmr, this);
 
     // for TMSVR
-    write_item_srv_ = nh_.advertiseService(ns_ + "tmr/write_item", &TmrRosNode::write_item, this);
-    ask_item_srv_ = nh_.advertiseService(ns_ + "tmr/ask_item", &TmrRosNode::ask_item, this);
+    write_item_srv_ = nh_.advertiseService("tmr/write_item", &TmrRosNode::write_item, this);
+    ask_item_srv_ = nh_.advertiseService("tmr/ask_item", &TmrRosNode::ask_item, this);
 
     // for TMSCT
-    send_script_srv_ = nh_.advertiseService(ns_ + "tmr/send_script", &TmrRosNode::send_script, this);
+    send_script_srv_ = nh_.advertiseService("tmr/send_script", &TmrRosNode::send_script, this);
   }
-    set_event_srv_ = nh_.advertiseService(ns_ + "tmr/set_event", &TmrRosNode::set_event, this);
+    set_event_srv_ = nh_.advertiseService("tmr/set_event", &TmrRosNode::set_event, this);
   if (!is_fake_) {
-    set_io_srv_ = nh_.advertiseService(ns_ + "tmr/set_io", &TmrRosNode::set_io, this);
+    set_io_srv_ = nh_.advertiseService("tmr/set_io", &TmrRosNode::set_io, this);
 
-    set_positions_srv_ = nh_.advertiseService(ns_ + "tmr/set_positions", &TmrRosNode::set_positions, this);
+    set_positions_srv_ = nh_.advertiseService("tmr/set_positions", &TmrRosNode::set_positions, this);
   }
-    set_pvt_srv_ = nh_.advertiseService(ns_ + "tmr/set_pvt", &TmrRosNode::set_pvt, this);
-    set_traj_srv_ = nh_.advertiseService(ns_ + "tmr/set_trajectory", &TmrRosNode::set_trajectory, this);
+    set_pvt_srv_ = nh_.advertiseService("tmr/set_pvt", &TmrRosNode::set_pvt, this);
+    set_traj_srv_ = nh_.advertiseService("tmr/set_trajectory", &TmrRosNode::set_trajectory, this);
   if (!is_fake_) {
-    ask_sta_srv_ = nh_.advertiseService(ns_ + "tmr/ask_sta", &TmrRosNode::ask_sta, this);
+    ask_sta_srv_ = nh_.advertiseService("tmr/ask_sta", &TmrRosNode::ask_sta, this);
   }
   
   ////////////////////////////////

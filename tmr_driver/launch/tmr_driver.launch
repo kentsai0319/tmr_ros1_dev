@@ -19,13 +19,12 @@
 
   <!--TODO: has ns? -->
 
-  <node name="tmr_driver" pkg="tmr_driver" type="tmr_driver" output="screen">
+  <node name="tmr_driver" pkg="tmr_driver" type="tmr_driver" ns ="$(arg ns)/" output="screen">
 
     <param name="sim" type="bool" value="$(arg sim)" />
 
     <param name="robot_ip_address" type="str" value="$(arg robot_ip)" />
 
-    <param name="ns" type="str" value="$(arg ns)" />
     <param name="prefix" type="str" value="$(arg prefix)" />
 
     <!--param name="max_velocity" type="double" value="$(arg max_velocity)" /-->

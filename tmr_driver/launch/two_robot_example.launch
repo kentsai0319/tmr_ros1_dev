@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <include file="$(find tmr_driver)/launch/tm5-900_driver.launch">
+    <arg name="sim" value="true" />
+    <!--arg name="robot_ip" value="127.0.0.1" /-->
+    <arg name="ns" value="r1" />
+  </include>
+
+  <include file="$(find tmr_driver)/launch/tm5-900_driver.launch">
+    <arg name="sim" value="true" />
+    <!--arg name="robot_ip" value="127.0.0.2" /-->
+    <arg name="ns" value="r2" />
+  </include>
+
+</launch>
