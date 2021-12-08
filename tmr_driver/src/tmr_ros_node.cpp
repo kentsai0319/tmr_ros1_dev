@@ -120,15 +120,16 @@ TmrRosNode::TmrRosNode(const std::string &host, bool is_fake)
 
     // for TMSCT
     send_script_srv_ = nh_.advertiseService(ns_ + "tmr/send_script", &TmrRosNode::send_script, this);
-
+  }
     set_event_srv_ = nh_.advertiseService(ns_ + "tmr/set_event", &TmrRosNode::set_event, this);
+  if (!is_fake_) {
     set_io_srv_ = nh_.advertiseService(ns_ + "tmr/set_io", &TmrRosNode::set_io, this);
 
     set_positions_srv_ = nh_.advertiseService(ns_ + "tmr/set_positions", &TmrRosNode::set_positions, this);
-
+  }
     set_pvt_srv_ = nh_.advertiseService(ns_ + "tmr/set_pvt", &TmrRosNode::set_pvt, this);
     set_traj_srv_ = nh_.advertiseService(ns_ + "tmr/set_trajectory", &TmrRosNode::set_trajectory, this);
-
+  if (!is_fake_) {
     ask_sta_srv_ = nh_.advertiseService(ns_ + "tmr/ask_sta", &TmrRosNode::ask_sta, this);
   }
   

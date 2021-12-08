@@ -27,6 +27,10 @@ bool TmrRosNode::set_event(tmr_msgs::SetEventRequest &req, tmr_msgs::SetEventRes
     break;
   case tmr_msgs::SetEventRequest::STOP:
     rb = iface_.set_stop();
+    if (is_fake_) {
+      iface_.sim_pvt_stop();
+      rb = true;
+    }
     break;
   case tmr_msgs::SetEventRequest::PAUSE:
     rb = iface_.set_pause();
@@ -77,22 +81,43 @@ bool TmrRosNode::set_pvt(tmr_msgs::SetPvtPointRequest &req, tmr_msgs::SetPvtPoin
   point.velocities = req.point.velocities;
   point.time = req.point.time;
 
-  switch (req.point.mode) {
-  case tmr_msgs::PvtPoint::JOINT:
-    rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Joint, point);
-    break;
-  case tmr_msgs::PvtPoint::TOOL:
-    rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Tool, point);
-    break;
-  case tmr_msgs::PvtPoint::EXIT:
-    rb = iface_.set_pvt_exit();
-    break;
-  case tmr_msgs::PvtPoint::ENTER_TOOL:
-    rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Tool);
-    break;
-  case tmr_msgs::PvtPoint::ENTER_JOINT:
-    rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Joint);
-    break;
+  if (!is_fake_) {
+    switch (req.point.mode) {
+    case tmr_msgs::PvtPoint::JOINT:
+      rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Joint, point);
+      break;
+    case tmr_msgs::PvtPoint::TOOL:
+      rb = iface_.set_pvt_point(tmrl::driver::PvtMode::Tool, point);
+      break;
+    case tmr_msgs::PvtPoint::EXIT:
+      rb = iface_.set_pvt_exit();
+      break;
+    case tmr_msgs::PvtPoint::ENTER_TOOL:
+      rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Tool);
+      break;
+    case tmr_msgs::PvtPoint::ENTER_JOINT:
+      rb = iface_.set_pvt_enter(tmrl::driver::PvtMode::Joint);
+      break;
+    }
+  }
+  else {
+    switch (req.point.mode) {
+    case tmr_msgs::PvtPoint::JOINT:
+      rb = iface_.sim_pvt_point(point);
+      break;
+    case tmr_msgs::PvtPoint::TOOL:
+      rb = false;
+      break;
+    case tmr_msgs::PvtPoint::EXIT:
+      rb = iface_.sim_pvt_exit();
+      break;
+    case tmr_msgs::PvtPoint::ENTER_TOOL:
+      rb = false;
+      break;
+    case tmr_msgs::PvtPoint::ENTER_JOINT:
+      rb = iface_.sim_pvt_enter();
+      break;
+    }
   }
   res.ok = rb;
   return rb;
@@ -118,7 +143,15 @@ bool TmrRosNode::set_trajectory(tmr_msgs::SetTrajectoryRequest &req, tmr_msgs::S
   }
   traj.total_time = tt;
 
-  rb = iface_.set_pvt_traj(traj);
+  if (!is_fake_) {
+    rb = iface_.set_pvt_traj(traj);
+  }
+  else {
+    if (traj.mode == tmrl::driver::PvtMode::Joint)
+      rb = iface_.sim_pvt_traj(traj);
+    else
+      rb = false;
+  }
   res.ok = rb;
   return rb;
 }
