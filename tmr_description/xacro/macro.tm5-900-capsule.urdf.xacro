@@ -4,7 +4,7 @@
   <xacro:include filename="$(find tmr_description)/xacro/macro.inertial.xacro" />
 
   <xacro:macro name="tm5-900" params="ns prefix
-    color:=none format:=obj">
+    color:=none format:=dae">
 <!--
     <xacro:property name="shoulder_offset" value="0.146" />
     <xacro:property name="elbow_offset" value="0.1297" />
