@@ -40,6 +40,10 @@
     <xacro:include filename="$(find tmr_description)/xacro/gripper/robotiq_2f.urdf.xacro" />
     <xacro:robotiq_2f prefix="$(arg prefix)"/>
   </xacro:if>
+  <xacro:if value="${gripper == 'rg2'}">
+    <xacro:include filename="$(find tmr_description)/xacro/gripper/on_robot_rg2.urdf.xacro" />
+    <xacro:on_robot_rg2 prefix="$(arg prefix)"/>
+  </xacro:if>
 
 <!--
   <link name="world"/>
