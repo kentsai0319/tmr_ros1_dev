@@ -28,8 +28,9 @@ bool TmrRosNode::connect_tmr(tmr_msgs::ConnectTMRRequest &req, tmr_msgs::Connect
   if (client) {
     if (req.connect) {
       tmrl_INFO_STREAM("TM_ROS: (re)connect(" << t_o << ") " << hdr);
-      client->stop();
-      rb = client->start(t_o);
+      //client->stop();
+      //rb = client->start(t_o);
+      client->set_reconnet();
     }
     if (req.reconnect) {
       client->set_reconnect_timeout(req.timeout);
